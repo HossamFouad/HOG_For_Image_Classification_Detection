@@ -1,6 +1,21 @@
 # ninja log v5
-8	61	598157914	CMakeFiles/TDCV2.dir/src/task2.cpp.obj	3c02f7f174d2db73
-19	73	598157914	CMakeFiles/TDCV2.dir/src/task3.cpp.obj	e27d82259e88ac3d
-1	1671	598157916	CMakeFiles/TDCV2.dir/main.cpp.obj	352b42dc70d63e7e
-14	1685	598157916	CMakeFiles/TDCV2.dir/src/task1.cpp.obj	c7d1c5a92b97d77a
-1685	2123	598157916	TDCV2.exe	8e78d1cce18ae5e9
+15	78	599001352	CMakeFiles/TDCV2.dir/src/task3.cpp.obj	4e3144198e02faf2
+23	86	599001352	CMakeFiles/TDCV2.dir/src/task2.cpp.obj	61fcbf473d961cb6
+8	1819	599001354	CMakeFiles/TDCV2.dir/main.cpp.obj	f67c71d551e80a17
+1	1861	599001354	CMakeFiles/TDCV2.dir/src/task1.cpp.obj	e6c2d410075f76cb
+1862	2484	599001355	TDCV2.exe	56e79297d410db7f
+1	1755	599001875	CMakeFiles/TDCV2.dir/src/task1.cpp.obj	e6c2d410075f76cb
+1755	2028	599001876	TDCV2.exe	56e79297d410db7f
+7	1641	599002180	CMakeFiles/TDCV2.dir/main.cpp.obj	f67c71d551e80a17
+1	1660	599002202	CMakeFiles/TDCV2.dir/main.cpp.obj	f67c71d551e80a17
+2	1696	599002264	CMakeFiles/TDCV2.dir/main.cpp.obj	f67c71d551e80a17
+7	1759	599002264	CMakeFiles/TDCV2.dir/src/task1.cpp.obj	e6c2d410075f76cb
+1	269	599002271	TDCV2.exe	56e79297d410db7f
+2	1832	599002574	CMakeFiles/TDCV2.dir/src/task1.cpp.obj	e6c2d410075f76cb
+1832	2162	599002574	TDCV2.exe	56e79297d410db7f
+1	1711	599002753	CMakeFiles/TDCV2.dir/src/task1.cpp.obj	e6c2d410075f76cb
+1711	2077	599002753	TDCV2.exe	56e79297d410db7f
+1	1798	599003000	CMakeFiles/TDCV2.dir/src/task1.cpp.obj	e6c2d410075f76cb
+1799	2061	599003000	TDCV2.exe	56e79297d410db7f
+1	1795	599003220	CMakeFiles/TDCV2.dir/src/task1.cpp.obj	e6c2d410075f76cb
+1796	2065	599003220	TDCV2.exe	56e79297d410db7f

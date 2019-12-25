@@ -25,7 +25,7 @@ set(MODULE_SOURCES
 "${SRC_DIR}/task2.cpp" 
 "${SRC_DIR}/task3.cpp")
 
-message("${MODULE_SOURCES}")
+message("${OpenCV_INCLUDE_DIRS}")
 # Add source to this project's executable.
 add_executable (TDCV2 "main.cpp" "${MODULE_SOURCES}" "${MODULE_HEADERS}")
 target_link_libraries( TDCV2 ${OpenCV_LIBS} )

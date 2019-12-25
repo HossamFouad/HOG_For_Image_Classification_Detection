@@ -1035,7 +1035,7 @@
 				}
 			],
 			"type" : "INTERNAL",
-			"value" : "[C:/Program Files/opencv][v4.1.2()]"
+			"value" : "[C:/Program Files/opencv_d][v4.1.2()]"
 		},
 		{
 			"name" : "OpenCV_DIR",
@@ -1043,11 +1043,11 @@
 			[
 				{
 					"name" : "HELPSTRING",
-					"value" : "The directory containing a CMake configuration file for OpenCV."
+					"value" : "No help, variable specified on the command line."
 				}
 			],
 			"type" : "PATH",
-			"value" : "C:/Program Files/opencv"
+			"value" : "C:/Program Files/opencv_d"
 		},
 		{
 			"name" : "TDCV2_BINARY_DIR",
