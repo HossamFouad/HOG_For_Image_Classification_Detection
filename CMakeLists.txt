@@ -16,14 +16,16 @@ set(INC_DIR "${PROJECT_SOURCE_DIR}/include")
 set(MODULE_HEADERS 
 "${INC_DIR}/task1.h" 
 "${INC_DIR}/task2.h" 
-"${INC_DIR}/task3.h")
+"${INC_DIR}/task3.h"
+"${INC_DIR}/RandomForest.h")
 message("${MODULE_HEADERS}")
 # list all the code files of the module
 set(SRC_DIR "${PROJECT_SOURCE_DIR}/src")
 set(MODULE_SOURCES 
 "${SRC_DIR}/task1.cpp" 
 "${SRC_DIR}/task2.cpp" 
-"${SRC_DIR}/task3.cpp")
+"${SRC_DIR}/task3.cpp"
+"${SRC_DIR}/RandomForest.cpp")
 
 message("${OpenCV_INCLUDE_DIRS}")
 # Add source to this project's executable.

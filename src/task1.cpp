@@ -2,31 +2,44 @@
 #include <filesystem>
 #include <string>
 #include "hog_visualization.cpp"
+#include <iostream>
+#include <fstream>
+#include <cstdio>
+namespace fs = std::filesystem;
 
-HOG::HOG(std::string p):imgPath_(p){
-
-}
+HOG::HOG(cv::Size p, cv::Size w, cv::Size bs, cv::Size bstride, cv::Size cz, int nb):
+	image_size(p),
+_wsize(w),
+_blockSize(bs),
+_blockStride(bstride),
+_cellSize(cz),
+_nbins(nb)
+{}
 
 HOG::~HOG() {
 	imgsVec.clear();
 	HOGVec.clear();
 	imgListVec_.clear();
 }
-void HOG::loadImgs() {
+void HOG::loadImgs(bool M) {
 	for (auto& imgName : imgListVec_) {
 		imgsVec.push_back(std::make_unique<cv::Mat>(cv::imread(imgName)));
 	}
 	std::cout << "Num of images Loaded =" << imgsVec.size() << std::endl;
+	for (int i = 0; i < imgListVec_.size();i++) {
+		PadOrigin(i);
+		if (M)GrayScale(i);
 
+	}
 }
 
-void HOG::imgList() {
-	namespace fs = std::filesystem;
-	for (const auto& entry : fs::directory_iterator(imgPath_)) {
-		auto str = entry.path().string();
-		if (str.find(".jpg") != std::string::npos|| str.find(".JPG") != std::string::npos) {
-			imgListVec_.push_back(str);
-		}
+void HOG::imgList(std::string p,float label) {
+	std::vector<cv::String> fn;
+	cv::glob(p+"/*.jpg", fn, false);
+
+	for (auto& entry : fn) {
+			imgListVec_.push_back(entry);
+			labels.push_back(label);	
 	}
 		
 }
@@ -41,29 +54,54 @@ void HOG::logImgSize(int index, const std::string& s) {
 		std::cout << "M" << index << ": Img size = " << ManimgsVec[index]->size() << " , Channels = " << ManimgsVec[index]->channels() << std::endl;
 	}
 }
-void HOG::HOGExtractor(cv::Size _wsize, cv::Size _blockSize, cv::Size _blockStride, cv::Size _cellSize, int _nbins) {
+void HOG::HOGExtractor(std::string p) {
 	hog.winSize = _wsize;
 	hog.blockSize = _blockSize;
 	hog.blockStride = _blockStride;
 	hog.cellSize = _cellSize;
 	hog.nbins = _nbins;
+	std::remove((p + std::string("Feats.csv")).c_str());
+	std::remove((p + "Labels.csv").c_str());
 	std::vector<float> feats;
+	int i = 0;
 	for(auto& imgptr: ManimgsVec){
 		hog.compute(*imgptr, feats, cv::Size(8, 8), cv::Size(0, 0));
-	std::cout<<feats.size()<<std::endl;
-	featsVec.push_back(std::make_unique<std::vector<float>>(feats));
+	std::cout<<"Extract "<< feats.size()<< " features from image "<<i++<<std::endl;
+	cv::Mat f = static_cast<cv::Mat>(feats).reshape(1, 1); // flatten to a single row
+	f.convertTo(f, CV_32F);     // ml needs float data
+	featsImg.push_back(f);
+	
 	}
+
+	std::ofstream outputFeats(p+"Feats.csv");
+	outputFeats << format(featsImg, cv::Formatter::FMT_CSV) << std::endl;
+	outputFeats.close();
+	std::ofstream outputLabels(p+"Labels.csv");
+	outputLabels << format(featslabel, cv::Formatter::FMT_CSV) << std::endl;
+	outputLabels.close();
+
 }
-void HOG::visualizeImg(int i, const std::string& s) {
+void HOG::HOGLoad(std::string p) {
+	cv::Ptr<cv::ml::TrainData> feats_data = cv::ml::TrainData::loadFromCSV(p + "Feats.csv", 0, -2, 0);
+	cv::Mat Fdata = feats_data->getSamples();
+	Fdata.convertTo(featsImg, CV_32F);
+	cv::Ptr<cv::ml::TrainData> labels_data = cv::ml::TrainData::loadFromCSV(p + "Labels.csv", 0, -2, 0);
+	cv::Mat Ldata = labels_data->getSamples();
+	Ldata.convertTo(featslabel, CV_32F);
+
+
+}
+
+void HOG::visualizeImg(int i, const std::string&s ) {
 	if (s == "I") {
-		cv::namedWindow("Image " + std::to_string(i), cv::WINDOW_AUTOSIZE); // Create a window for display.
-		cv::imshow("Image " + std::to_string(i), *imgsVec[i]);                // Show our image inside it.
+		cv::namedWindow("Image= " + std::to_string(i)+", Class= "+ std::to_string(int(labels.at<float>(i)))+", path= "+ imgListVec_[i], cv::WINDOW_AUTOSIZE); // Create a window for display.
+		cv::imshow("Image= " + std::to_string(i) + ", Class= " + std::to_string(int(labels.at<float>(i))) + ", path= " + imgListVec_[i], *imgsVec[i]);                // Show our image inside it.
 		cv::waitKey(0); // Wait for a keystroke in the window
 
 	}
 	else {
-		cv::namedWindow("ManipulatedImage " + std::to_string(i), cv::WINDOW_AUTOSIZE); // Create a window for display.
-		cv::imshow("ManipulatedImage " + std::to_string(i), *ManimgsVec[i]);                // Show our image inside it.
+		cv::namedWindow("ManipulatedImage= " + std::to_string(i) + ", Class= " + std::to_string(int(labels.at<float>(i))) + ", path= " + ManimgListVec_[i], cv::WINDOW_AUTOSIZE); // Create a window for display.
+		cv::imshow("ManipulatedImage= " + std::to_string(i) + ", Class= " + std::to_string(int(labels.at<float>(i))) + ", path= " + ManimgListVec_[i], *ManimgsVec[i]);                // Show our image inside it.
 		cv::waitKey(0); // Wait for a keystroke in the window
 
 	}
@@ -71,21 +109,29 @@ void HOG::visualizeImg(int i, const std::string& s) {
 void HOG::setToIdentity(int index) {
 	ManimgsVec.push_back(std::make_unique<cv::Mat>(imgsVec[index]->rows, imgsVec[index]->cols, imgsVec[index]->depth()));
 	*(ManimgsVec.back()) = imgsVec[index]->clone();
+	featslabel.push_back(labels.at<float>(index));
 }
 void HOG::clearManVec() {
 	ManimgsVec.clear();
-	featsVec.clear();
+	featsImg.release();
+	featslabel.release();
+	ManimgListVec_.clear();
 }
 void HOG::GrayScale(int index) {
-	ManimgsVec.push_back(std::make_unique<cv::Mat>(imgsVec[index]->rows, imgsVec[index]->cols, imgsVec[index]->depth()));
-	cv::cvtColor(*imgsVec[index], *(ManimgsVec.back()), cv::COLOR_BGR2GRAY);
-	logImgSize(0);
+	//ManimgsVec.push_back(std::make_unique<cv::Mat>(imgsVec[index]->rows, imgsVec[index]->cols, imgsVec[index]->depth()));
+	cv::cvtColor(*imgsVec[index], *imgsVec[index], cv::COLOR_BGR2GRAY);
+	//featslabel.push_back(labels.at<float>(index));
+	//ManimgListVec_.push_back(imgListVec_[index]);
+
 }
 
 
 void HOG::Resized(int index, float xfactor, float yfactor) {
 	ManimgsVec.push_back(std::make_unique<cv::Mat>(imgsVec[index]->rows, imgsVec[index]->cols, imgsVec[index]->depth()));
 	cv::resize(*imgsVec[index], *(ManimgsVec.back()), cv::Size(imgsVec[index]->cols * xfactor, imgsVec[index]->rows * yfactor), 0, 0);
+	featslabel.push_back(labels.at<float>(index));
+	ManimgListVec_.push_back(imgListVec_[index]);
+
 }
 void HOG::Rotated(int index, double angle, double scale) {
 	ManimgsVec.push_back(std::make_unique<cv::Mat>(imgsVec[index]->rows, imgsVec[index]->cols, imgsVec[index]->depth()));
@@ -93,24 +139,42 @@ void HOG::Rotated(int index, double angle, double scale) {
 	cv::Point center = cv::Point(imgsVec[index]->cols / 2, imgsVec[index]->rows / 2);
 	rot_mat = cv::getRotationMatrix2D(center, angle, scale);
 	warpAffine(*imgsVec[index], *(ManimgsVec.back()), rot_mat, imgsVec[index]->size());
+	featslabel.push_back(labels.at<float>(index));
+	ManimgListVec_.push_back(imgListVec_[index]);
+
+}
+void HOG::RotatedAndFlip(int index, double angle, double scale,int x) {
+	ManimgsVec.push_back(std::make_unique<cv::Mat>(imgsVec[index]->rows, imgsVec[index]->cols, imgsVec[index]->depth()));
+	cv::Mat rot_mat(2, 3, CV_32FC1);
+	cv::Point center = cv::Point(imgsVec[index]->cols / 2, imgsVec[index]->rows / 2);
+	rot_mat = cv::getRotationMatrix2D(center, angle, scale);
+	warpAffine(*imgsVec[index], *(ManimgsVec.back()), rot_mat, imgsVec[index]->size());
+	flip(*(ManimgsVec.back()), *(ManimgsVec.back()), x);
+	featslabel.push_back(labels.at<float>(index));
+	ManimgListVec_.push_back(imgListVec_[index]);
 
 }
 void HOG::Flip(int index, int x) {
 	ManimgsVec.push_back(std::make_unique<cv::Mat>(imgsVec[index]->rows, imgsVec[index]->cols, imgsVec[index]->depth()));
 	flip(*imgsVec[index], *(ManimgsVec.back()), x);
+	featslabel.push_back(labels.at<float>(index));
+	ManimgListVec_.push_back(imgListVec_[index]);
+
 }
-void HOG::PadOrigin(int index, int image_size) {
-	cv::Mat image_padded(image_size, image_size, imgsVec[index]->depth());
-	int left = int((image_size - imgsVec[index]->cols) / 2);
-	int right = image_size - imgsVec[index]->cols - left;
-	int top = int((image_size - imgsVec[index]->rows) / 2);
-	int bottom = image_size - imgsVec[index]->rows - top;
+void HOG::PadOrigin(int index) {
+	if (xmax < imgsVec[index]->size[0])xmax = imgsVec[index]->size[0];
+	if (ymax < imgsVec[index]->size[1])ymax = imgsVec[index]->size[1];
+	int left = int((image_size.height - imgsVec[index]->cols) / 2);
+	int right = image_size.height - imgsVec[index]->cols - left;
+	int top = int((image_size.width - imgsVec[index]->rows) / 2);
+	int bottom = image_size.width - imgsVec[index]->rows - top;
 
 	if (left < 0 || right < 0 || top < 0 || bottom < 0) {
 		std::cout << "Stupid" << std::endl;
 	}
-	std::unique_ptr<cv::Mat>  padded= std::make_unique<cv::Mat>(image_size, image_size, imgsVec[index]->depth());
-	cv::copyMakeBorder(*imgsVec[index], *padded, top, bottom, left, right, cv::BORDER_CONSTANT);
+	std::unique_ptr<cv::Mat>  padded= std::make_unique<cv::Mat>(image_size.height, image_size.width, imgsVec[index]->depth());
+	
+	cv::copyMakeBorder(*imgsVec[index], *padded, top, bottom, left, right, cv::BORDER_REPLICATE);
 	*imgsVec[index] = padded->clone();
 
 }
@@ -120,18 +184,25 @@ void HOG::PadOrigin(int index, int image_size) {
 std::unique_ptr<cv::Mat>& HOG::GetImage(int index) {
 	return imgsVec[index];
 }
+
 std::unique_ptr<cv::Mat>& HOG::GetManImg(int index) {
 	return ManimgsVec[index];
 }
-void HOG::VisHOG(int index,int scale_factor) {
- 	visualizeHOG(*ManimgsVec[index], *featsVec[index], hog, scale_factor);
+int HOG::GetManImgNum() {
+	return ManimgListVec_.size();
 }
 
-void HOG::PrintPath() {
-	std::cout << imgPath_ << std::endl;
-	
+int HOG::GetImgNum() {
+	return imgListVec_.size();
+}
+
+void HOG::VisHOG(int index,int scale_factor) {
+ 	visualizeHOG(*ManimgsVec[index], static_cast<std::vector<float>>(featsImg.row(index)), hog, scale_factor);
 }
 
 void HOG::PrintImgList() {
 	for (const auto& f : imgListVec_)std::cout << f << std::endl;
+}
+void HOG::PrintImglabels() {
+	std::cout << labels << std::endl;
 }
