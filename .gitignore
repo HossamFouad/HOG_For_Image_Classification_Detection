@@ -348,3 +348,5 @@ MigrationBackup/
 
 # Ionide (cross platform F# VS Code tools) working folder
 .ionide/
+/data/task3/train0Feats.csv
+/data/task2/train0Feats.csv

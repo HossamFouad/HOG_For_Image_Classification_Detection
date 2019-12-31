@@ -32,12 +32,20 @@ struct Config {
 	bool loaded = true;// Loading HOG features
 	bool trained = true; // loading trained random forest
 	std::vector<std::string> folders{ "train","test","models","predictions" };
-	std::vector<std::string> classesFolder{ "Teeth","Motor","Black Item","Background" };
 	struct RF RandomForest;
 	struct HOGDesc HOG;
 	struct ImgProc ImgConfig;
 
 
 	};
+
+struct DetectionConfig {
+	std::vector<std::string> classesFolder{ "Teeth","Motor","Black Item","Background" };
+	std::vector<cv::Scalar> classesColors{ cv::Scalar(0, 255, 0),cv::Scalar(255, 0, 0),cv::Scalar(0, 0, 255)};
+	std::vector<std::string> Detectionfolders{ "gt","boundingBoxGT","boundingBoxInference","boundingBoxExperiment" };
+	std::vector<int> boundingbox{ 80,120,160,200,240 };
+	float threshold = 0.5;
+	struct Config classifier;
+};
 
 

@@ -5,6 +5,7 @@
 #include <opencv2/opencv.hpp>
 #include "task1.h"
 #include "task2.h"
+#include "task3.h"
 #include<filesystem>
 #include "Config.h"
 
@@ -81,6 +82,19 @@ int main()
 	delete config;
 
 	*/
+	
+	 //Task3
+	struct DetectionConfig* config = new DetectionConfig();
+	config->classifier.loaded = false;
+	config->classifier.trained = false;
+	std::string imgpath = (std::filesystem::current_path() / ".." / ".." / ".." / "data" / "task3").string();
+	auto p = new Detection(imgpath,config);
+	p->LoadInferenceImgs();
+	p->LoadGTBoundingBox();
+	//p->SaveBoundingBoxGT();
+	p->TrainClassifier();
+	delete config;
+
 	
 	return 0;
 }

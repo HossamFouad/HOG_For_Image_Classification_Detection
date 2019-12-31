@@ -153,6 +153,8 @@ void HOG::Resized(int index, float xfactor, float yfactor) {
 	cv::resize(*imgsVec[index], *(ManimgsVec.back()), cv::Size(imgsVec[index]->cols * xfactor, imgsVec[index]->rows * yfactor), 0, 0);
 	featslabel.push_back(labels.at<float>(index));
 	ManimgListVec_.push_back(imgListVec_[index]);
+	ManStr.push_back("Resized(" + std::to_string(xfactor) + "," + std::to_string(yfactor) + ")");
+
 
 }
 void HOG::Rotated(int index, double angle, double scale) {
