@@ -1,7 +1,7 @@
 # ninja log v5
-10	210	599264403	CMakeFiles/TDCV2.dir/src/task3.cpp.obj	e4659bee86671a0e
-8	1770	599264405	CMakeFiles/TDCV2.dir/src/RandomForest.cpp.obj	df4e0121a632e8f2
-0	1941	599264405	CMakeFiles/TDCV2.dir/main.cpp.obj	8537838b6eb5e4b8
-3	2116	599264405	CMakeFiles/TDCV2.dir/src/task2.cpp.obj	d0c2d23916ed88ae
-5	2135	599264405	CMakeFiles/TDCV2.dir/src/task1.cpp.obj	e75a5e378d4f5d0f
-2135	2641	599264405	TDCV2.exe	21f2db5ccffaee2d
+27	174	599463317	CMakeFiles/TDCV2.dir/src/task3.cpp.obj	e4659bee86671a0e
+2	5204	599463322	CMakeFiles/TDCV2.dir/main.cpp.obj	8537838b6eb5e4b8
+36	5263	599463322	CMakeFiles/TDCV2.dir/src/RandomForest.cpp.obj	df4e0121a632e8f2
+10	5757	599463322	CMakeFiles/TDCV2.dir/src/task1.cpp.obj	e75a5e378d4f5d0f
+18	5822	599463322	CMakeFiles/TDCV2.dir/src/task2.cpp.obj	d0c2d23916ed88ae
+5823	7047	599463323	TDCV2.exe	21f2db5ccffaee2d

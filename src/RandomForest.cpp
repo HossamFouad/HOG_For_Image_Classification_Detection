@@ -52,34 +52,67 @@ void RandomForest::load(const std::string& p) {
     }
 }
 void RandomForest::train(cv::Mat& featsImg, cv::Mat& featslabel) {
-    cv::Ptr<cv::ml::TrainData> bootstrap = cv::ml::TrainData::create(featsImg, cv::ml::ROW_SAMPLE, featslabel);
+    
+  
     for (int t = 0; t < _num_trees; ++t) {
         std::cout << "Train tree no:" << t << std::endl;
+        cv::Mat accVal;
+        cv::Ptr<cv::ml::TrainData> bootstrap = cv::ml::TrainData::create(featsImg, cv::ml::ROW_SAMPLE, featslabel);
         bootstrap->setTrainTestSplitRatio(_ratio, true);
-        bootstrap->shuffleTrainTest();
+        //std::cout << bootstrap->getTrainSampleIdx().size() << std::endl;
+        //std::cout << bootstrap->getTestResponses().size() << std::endl;
+        //bootstrap->shuffleTrainTest();
         _forest[t]->train(bootstrap);
+        _forest[t]->predict(bootstrap->getTestSamples(), accVal);
+        validate(bootstrap->getTestResponses(), accVal);
+        accVal.release();
     }
 
 }
-     
-void RandomForest::Prediction(cv::Mat& featsImg) {
+void RandomForest::train(int index, cv::Mat& featsImg, cv::Mat& featslabel) {
+        std::cout << "Train tree no:" << index << std::endl;
+        cv::Mat accVal;
+        cv::Ptr<cv::ml::TrainData> bootstrap = cv::ml::TrainData::create(featsImg, cv::ml::ROW_SAMPLE, featslabel);
+        bootstrap->setTrainTestSplitRatio(_ratio, true);
+        _forest[index]->train(bootstrap);
+        _forest[index]->predict(bootstrap->getTestSamples(), accVal);
+        validate(bootstrap->getTestResponses(), accVal);
+
+}
+
+
+
+void RandomForest::Prediction(const cv::Mat& featsImg) {
+    predM.release();
+    pred.release();
+    belief.release();
     cv::Mat f;
     for (int i = 0; i < _num_trees; i++) {
         _forest[i]->predict(featsImg, f);
         predM.push_back(f.reshape(1, 1));
     }
     predM.convertTo(predM, 4);
-    std::cout << predM << std::endl;
+    
     for (int i = 0; i < predM.cols; i++) {
         f = predM.col(i);
-        pred.push_back(float(MajorityVote(f)));
-
-    }
-   
-
-
+        //std::cout << f << std::endl;
+       
+        auto vec = MajorityVote(f);
+        pred.push_back(vec[0]);
+        belief.push_back(vec[1]);
+    }  
 }
-int RandomForest::MajorityVote(cv::Mat& predCol) {
+
+cv::Mat RandomForest::GetPrediction() {
+    cv::Mat predMat = pred.clone();
+    predMat.convertTo(predMat, 4);
+    return predMat;
+}
+cv::Mat RandomForest::GetBelief() {
+    cv::Mat BeliefMat = belief.clone();
+    return BeliefMat;
+}
+std::vector<float> RandomForest::MajorityVote(cv::Mat& predCol) {
      int size = predCol.rows;
      cv::Mat count = cv::Mat::zeros(cv::Size(1, _max_categories), 4);
           for (int i = 0; i < size; i++) {
@@ -88,16 +121,59 @@ int RandomForest::MajorityVote(cv::Mat& predCol) {
           }
           double min, max;
           cv::Point min_loc, max_loc;
+          
           minMaxLoc(count, &min, &max, &min_loc, &max_loc);
-          return max_loc.y;
+          std::vector<float> vec{ float(max_loc.y),float(max / size) };
+          return vec ;
       }
     
 void RandomForest::accuracy(cv::Mat& featslabel) {
-    std::cout << pred << std::endl;
-    std::cout << featslabel << std::endl;
+    //std::cout << pred << std::endl;
+    //std::cout << featslabel << std::endl;
 
           acc = cv::sum((pred == featslabel))[0] / 255.0;
           acc /= featslabel.rows;
           acc *= 100;
-          std::cout << "Prediction Accuracy= " << acc << "%" << std::endl;
-      }
+          std::cout << "Total Prediction Accuracy= " << acc << "%" << std::endl;
+          std::cout << "<<<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>>>>" << std::endl;
+          accuracyforDT(featslabel);
+}
+
+void RandomForest::validate(cv::Mat& featslabel, cv::Mat& val) {
+    //std::cout << pred << std::endl;
+    //std::cout << featslabel << std::endl;
+    //std::cout << val << std::endl;
+    float valAcc;
+    val = val.reshape(1, 1);
+    val.convertTo(val, 4);
+    val.convertTo(val, CV_32F);
+    cv::transpose(val, val);
+    //std::cout << val << std::endl;
+    //std::cout << featslabel<< std::endl;
+
+    valAcc = cv::sum((val == featslabel))[0] / 255.0;
+    valAcc /= featslabel.rows;
+    valAcc *= 100;
+    std::cout << "validation Prediction Accuracy= " << valAcc << "%" << std::endl;
+    std::cout << "<<<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>>>>" << std::endl;
+    
+}
+
+void RandomForest::accuracyforDT(cv::Mat& featslabel) {
+    //std::cout << pred << std::endl;
+    //std::cout << featslabel << std::endl;
+    cv::Mat predDT;
+    float f;
+    for (int i = 0; i < predM.rows; i++) {
+        predDT = predM.row(i);
+        std::cout << predDT << std::endl;
+        cv::transpose(predDT, predDT);
+        predDT.convertTo(predDT, CV_32F);
+        f = cv::sum((predDT== featslabel))[0] / 255.0;
+        f /= featslabel.rows;
+        f *= 100;
+        std::cout << "test Accuracy for tree no."<<i<<"  = " << f << "%" << std::endl;
+        accVec.push_back(f);
+    }
+    
+}

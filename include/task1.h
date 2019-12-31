@@ -5,11 +5,11 @@
 class HOG {
 public:
 	friend class Classifier;
-	HOG(cv::Size, cv::Size, cv::Size, cv::Size, cv::Size, int);
+	HOG(cv::Size, cv::Size, cv::Size, cv::Size, cv::Size, int,int);
 	virtual ~HOG();
 	void loadImgs(bool M = true);
 	void imgList(std::string,float);
-	void HOGExtractor(std::string p);
+	void HOGExtractor(std::string p = "");
 	void HOGLoad(std::string p);
 	void VisHOG(int, int scale_factor=1);
 	void PrintImgList();
@@ -23,7 +23,9 @@ public:
 	void PadOrigin(int);
 	void clearManVec();
 	void setToIdentity(int);
+	void HOG::loadImgs(const std::vector<cv::Mat> &);
 	void PrintImglabels();
+	cv::Mat GetGroundTruth();
 	std::unique_ptr<cv::Mat>& GetManImg(int);
 	std::unique_ptr<cv::Mat>& GetImage(int);
 	int GetManImgNum();
@@ -38,12 +40,14 @@ protected:
 	cv::Mat featslabel;
 	std::vector<cv::Mat> HOGVec;
 private:
+	std::vector<std::string> ManStr;
 	cv::Size image_size;
 	cv::Size _wsize;
 	cv::Size _blockSize;
 	cv::Size _blockStride;
 	cv::Size _cellSize;
 	int _nbins;
+	int _padType;
 	
 	
 	cv::HOGDescriptor hog;

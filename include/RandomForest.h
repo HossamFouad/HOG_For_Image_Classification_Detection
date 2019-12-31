@@ -5,17 +5,23 @@ public:
     RandomForest(float,int, int, int, int, int);
     void createRF();
     void train(cv::Mat&, cv::Mat&);
-    void Prediction(cv::Mat&);
+    void RandomForest::train(int, cv::Mat&, cv::Mat&);
+    void Prediction(const cv::Mat&);
     void accuracy(cv::Mat&);
     void save(const std::string&); 
     void load(const std::string&);
-
+    void accuracyforDT(cv::Mat& featslabel);
+    cv::Mat GetPrediction();
+    cv::Mat GetBelief();
 protected:
-   cv::Mat pred, predM;
+   cv::Mat pred,belief, predM;
     cv::Mat float_labels;
     float acc;
+    std::vector<float> accVec;
+
 private:
-    int MajorityVote(cv::Mat&);
+    void validate(cv::Mat&, cv::Mat&);
+    std::vector<float> MajorityVote(cv::Mat&);
     float _ratio;
     int _num_trees;
     int _cv_folds;

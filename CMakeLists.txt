@@ -17,7 +17,8 @@ set(MODULE_HEADERS
 "${INC_DIR}/task1.h" 
 "${INC_DIR}/task2.h" 
 "${INC_DIR}/task3.h"
-"${INC_DIR}/RandomForest.h")
+"${INC_DIR}/RandomForest.h"
+"${INC_DIR}/Config.h")
 message("${MODULE_HEADERS}")
 # list all the code files of the module
 set(SRC_DIR "${PROJECT_SOURCE_DIR}/src")

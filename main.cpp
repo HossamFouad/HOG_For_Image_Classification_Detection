@@ -6,22 +6,21 @@
 #include "task1.h"
 #include "task2.h"
 #include<filesystem>
-
+#include "Config.h"
 
 
 int main()
 {
-
-	
+	struct Config* config = new Config();
 	
 	// HOG Descriptor Parameters
-	cv::Size imgSize = cv::Size(384,384);
+	/*cv::Size imgSize = cv::Size(384,384);
 	cv::Size WinSize = cv::Size(384, 384);
 	cv::Size BlockSize = cv::Size(64, 64);
-	cv::Size BlockStride = cv::Size(8, 8);
+	cv::Size BlockStride = cv::Size(32, 32);
 	cv::Size CellSize = cv::Size(32, 32);
 	int Bins = 8;
-	/*// Resize
+	// Resize
 	float xfactor = 2;
 	float yfactor = 2;
 	// Rotate
@@ -63,35 +62,40 @@ int main()
 	p->HOGExtractor(WinSize, BlockSize, BlockStride, CellSize, Bins);
 	p->VisHOG(0);
 	p->clearManVec();
-	*/
-	float randomSampleRatio = 0.95;
-	int num_trees = 1;
+	
+	float randomSampleRatio = 0.90;
+	int num_trees = 10;
 	int cv_folds = 1;
-	int max_depth = 5;
+	int max_depth = 25;
+	int categoriesNum = 6;
 	int min_sample_count = 40;
-	std::vector<std::string> folder{ "train","test","models" };
+	std::vector<std::string> folder{ "train","test","models","predictions" };
+	std::vector<std::string> classesFolder{ "Teeth","Motor","Black Item","Background" };
 	std::string imgpath = (std::filesystem::current_path() / ".." / ".." / ".." / "data" / "task2").string();
 	auto p = new Classifier(imgpath, randomSampleRatio, num_trees, cv_folds, max_depth, min_sample_count, 
-		folder,imgSize, WinSize, BlockSize, BlockStride, CellSize, Bins);
+		folder,imgSize, WinSize, BlockSize, BlockStride, CellSize, Bins, categoriesNum, classesFolder);
 
 	
 	bool Manipulation = true;
-	int NumManPerImg = 10;
-	bool loaded = false;
-	bool trained = false;
-	
-	if (!trained) {
+	int NumManPerImg = 32;
+	bool loaded = true;
+	bool trained = true;
+	*/
+	std::string imgpath = (std::filesystem::current_path() / ".." / ".." / ".." / "data" / "task2").string();
+	auto p = new Classifier(imgpath,config);
+	if (!config->trained) {
 		p->loadTrainImgs();
-		p->imgsPreprocessing(Manipulation,loaded, NumManPerImg);
+		p->imgsPreprocessing();
 		p->trainRandomForest();
+		//p->MultiAugTrain();
 
 	}
 	
 	
 
 	p->loadTestImgs();
-	p->testRandomForest(trained,loaded);
-
+	p->testRandomForest();
+	delete config;
 
 	return 0;
 }

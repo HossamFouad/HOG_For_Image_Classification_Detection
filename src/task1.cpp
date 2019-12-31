@@ -7,13 +7,14 @@
 #include <cstdio>
 namespace fs = std::filesystem;
 
-HOG::HOG(cv::Size p, cv::Size w, cv::Size bs, cv::Size bstride, cv::Size cz, int nb):
+HOG::HOG(cv::Size p, cv::Size w, cv::Size bs, cv::Size bstride, cv::Size cz, int nb, int padType):
 	image_size(p),
 _wsize(w),
 _blockSize(bs),
 _blockStride(bstride),
 _cellSize(cz),
-_nbins(nb)
+_nbins(nb),
+_padType(padType)
 {}
 
 HOG::~HOG() {
@@ -30,6 +31,16 @@ void HOG::loadImgs(bool M) {
 		PadOrigin(i);
 		if (M)GrayScale(i);
 
+	}
+}
+void HOG::loadImgs(const std::vector<cv::Mat>& extImgVec) {
+	imgsVec.clear();
+	for (auto& img : extImgVec) {
+		imgsVec.push_back(std::make_unique<cv::Mat>(img.clone()));
+	}
+	std::cout << "Num of images Loaded =" << imgsVec.size() << std::endl;
+	for (int i = 0; i < imgsVec.size(); i++) {
+		PadOrigin(i);
 	}
 }
 
@@ -73,21 +84,29 @@ void HOG::HOGExtractor(std::string p) {
 	
 	}
 
-	std::ofstream outputFeats(p+"Feats.csv");
-	outputFeats << format(featsImg, cv::Formatter::FMT_CSV) << std::endl;
-	outputFeats.close();
-	std::ofstream outputLabels(p+"Labels.csv");
-	outputLabels << format(featslabel, cv::Formatter::FMT_CSV) << std::endl;
-	outputLabels.close();
-
+	if (!(p == "")) {
+		std::ofstream outputFeats(p + "Feats.csv");
+		outputFeats << format(featsImg, cv::Formatter::FMT_CSV) << std::endl;
+		outputFeats.close();
+		if (!labels.empty())
+		{
+			std::ofstream outputLabels(p + "Labels.csv");
+			outputLabels << format(featslabel, cv::Formatter::FMT_CSV) << std::endl;
+			outputLabels.close();
+		}
+	}
+	
 }
 void HOG::HOGLoad(std::string p) {
 	cv::Ptr<cv::ml::TrainData> feats_data = cv::ml::TrainData::loadFromCSV(p + "Feats.csv", 0, -2, 0);
 	cv::Mat Fdata = feats_data->getSamples();
 	Fdata.convertTo(featsImg, CV_32F);
-	cv::Ptr<cv::ml::TrainData> labels_data = cv::ml::TrainData::loadFromCSV(p + "Labels.csv", 0, -2, 0);
-	cv::Mat Ldata = labels_data->getSamples();
-	Ldata.convertTo(featslabel, CV_32F);
+	if (!labels.empty())
+	{
+		cv::Ptr<cv::ml::TrainData> labels_data = cv::ml::TrainData::loadFromCSV(p + "Labels.csv", 0, -2, 0);
+		cv::Mat Ldata = labels_data->getSamples();
+		Ldata.convertTo(featslabel, CV_32F);
+	}
 
 
 }
@@ -100,8 +119,8 @@ void HOG::visualizeImg(int i, const std::string&s ) {
 
 	}
 	else {
-		cv::namedWindow("ManipulatedImage= " + std::to_string(i) + ", Class= " + std::to_string(int(labels.at<float>(i))) + ", path= " + ManimgListVec_[i], cv::WINDOW_AUTOSIZE); // Create a window for display.
-		cv::imshow("ManipulatedImage= " + std::to_string(i) + ", Class= " + std::to_string(int(labels.at<float>(i))) + ", path= " + ManimgListVec_[i], *ManimgsVec[i]);                // Show our image inside it.
+		cv::namedWindow("ManipulatedImage= " + std::to_string(i) + ", Class= " + std::to_string(int(labels.at<float>(i))) + ", Manipulation= " + ManStr[i] + ", path= " + ", path= " + ManimgListVec_[i], cv::WINDOW_AUTOSIZE); // Create a window for display.
+		cv::imshow("ManipulatedImage= " + std::to_string(i) + ", Class= " + std::to_string(int(labels.at<float>(i))) + ", Manipulation= " + ManStr[i]+ ", path= " + ManimgListVec_[i], *ManimgsVec[i]);                // Show our image inside it.
 		cv::waitKey(0); // Wait for a keystroke in the window
 
 	}
@@ -109,20 +128,20 @@ void HOG::visualizeImg(int i, const std::string&s ) {
 void HOG::setToIdentity(int index) {
 	ManimgsVec.push_back(std::make_unique<cv::Mat>(imgsVec[index]->rows, imgsVec[index]->cols, imgsVec[index]->depth()));
 	*(ManimgsVec.back()) = imgsVec[index]->clone();
-	featslabel.push_back(labels.at<float>(index));
+	if (!labels.empty())featslabel.push_back(labels.at<float>(index));
 }
+
+
 void HOG::clearManVec() {
 	ManimgsVec.clear();
 	featsImg.release();
 	featslabel.release();
+	ManStr.clear();
 	ManimgListVec_.clear();
 }
 void HOG::GrayScale(int index) {
-	//ManimgsVec.push_back(std::make_unique<cv::Mat>(imgsVec[index]->rows, imgsVec[index]->cols, imgsVec[index]->depth()));
 	cv::cvtColor(*imgsVec[index], *imgsVec[index], cv::COLOR_BGR2GRAY);
-	//featslabel.push_back(labels.at<float>(index));
-	//ManimgListVec_.push_back(imgListVec_[index]);
-
+	
 }
 
 
@@ -141,7 +160,7 @@ void HOG::Rotated(int index, double angle, double scale) {
 	warpAffine(*imgsVec[index], *(ManimgsVec.back()), rot_mat, imgsVec[index]->size());
 	featslabel.push_back(labels.at<float>(index));
 	ManimgListVec_.push_back(imgListVec_[index]);
-
+	ManStr.push_back("Rotated(" + std::to_string(angle) + "," + std::to_string(scale) + ")");
 }
 void HOG::RotatedAndFlip(int index, double angle, double scale,int x) {
 	ManimgsVec.push_back(std::make_unique<cv::Mat>(imgsVec[index]->rows, imgsVec[index]->cols, imgsVec[index]->depth()));
@@ -152,13 +171,14 @@ void HOG::RotatedAndFlip(int index, double angle, double scale,int x) {
 	flip(*(ManimgsVec.back()), *(ManimgsVec.back()), x);
 	featslabel.push_back(labels.at<float>(index));
 	ManimgListVec_.push_back(imgListVec_[index]);
-
+	ManStr.push_back("RotatedAndFlip(" + std::to_string(angle) + "," + std::to_string(scale) + "," + std::to_string(x) + ")");
 }
 void HOG::Flip(int index, int x) {
 	ManimgsVec.push_back(std::make_unique<cv::Mat>(imgsVec[index]->rows, imgsVec[index]->cols, imgsVec[index]->depth()));
 	flip(*imgsVec[index], *(ManimgsVec.back()), x);
 	featslabel.push_back(labels.at<float>(index));
 	ManimgListVec_.push_back(imgListVec_[index]);
+	ManStr.push_back("Flip(" + std::to_string(x) + ")");
 
 }
 void HOG::PadOrigin(int index) {
@@ -174,7 +194,7 @@ void HOG::PadOrigin(int index) {
 	}
 	std::unique_ptr<cv::Mat>  padded= std::make_unique<cv::Mat>(image_size.height, image_size.width, imgsVec[index]->depth());
 	
-	cv::copyMakeBorder(*imgsVec[index], *padded, top, bottom, left, right, cv::BORDER_REPLICATE);
+	cv::copyMakeBorder(*imgsVec[index], *padded, top, bottom, left, right, _padType);
 	*imgsVec[index] = padded->clone();
 
 }
@@ -187,6 +207,13 @@ std::unique_ptr<cv::Mat>& HOG::GetImage(int index) {
 
 std::unique_ptr<cv::Mat>& HOG::GetManImg(int index) {
 	return ManimgsVec[index];
+}
+
+
+cv::Mat HOG::GetGroundTruth() {
+	cv::Mat predMat = featslabel.clone();
+	predMat.convertTo(predMat, 4);
+	return predMat;
 }
 int HOG::GetManImgNum() {
 	return ManimgListVec_.size();
