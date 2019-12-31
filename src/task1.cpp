@@ -129,6 +129,9 @@ void HOG::setToIdentity(int index) {
 	ManimgsVec.push_back(std::make_unique<cv::Mat>(imgsVec[index]->rows, imgsVec[index]->cols, imgsVec[index]->depth()));
 	*(ManimgsVec.back()) = imgsVec[index]->clone();
 	if (!labels.empty())featslabel.push_back(labels.at<float>(index));
+	ManimgListVec_.push_back(imgListVec_[index]);
+	ManStr.push_back("Identity");
+
 }
 
 
