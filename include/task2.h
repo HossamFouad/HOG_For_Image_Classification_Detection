@@ -18,7 +18,7 @@ public:
 	void MultiAugTrain();
 	void trainRandomForest();
 	void testRandomForest();
-	cv::Mat inference(std::vector<cv::Mat>&,bool);
+	std::vector<cv::Mat> inference(std::vector<cv::Mat>&);
 
 	
 protected:
@@ -50,6 +50,5 @@ private:
 	//cv::Size cz;
 	//int nb;
 	//std::vector<std::string> _className;
-	int inferenceCount;
 	struct Config* configPtr;
 };

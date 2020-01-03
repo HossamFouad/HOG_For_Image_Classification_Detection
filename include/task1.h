@@ -7,7 +7,7 @@ public:
 	friend class Classifier;
 	HOG(cv::Size, cv::Size, cv::Size, cv::Size, cv::Size, int,int);
 	virtual ~HOG();
-	void loadImgs(bool M = true);
+	void loadImgs(bool M = true, int num=0);
 	void imgList(std::string,float);
 	void HOGExtractor(std::string p = "");
 	void HOGLoad(std::string p);
@@ -18,9 +18,10 @@ public:
 	void GrayScale(int);
 	void Resized(int, float, float);
 	void Rotated(int, double, double scale = 1);
-	void RotatedAndFlip(int index, double angle, double scale, int x);
+	void RotatedAndFlip(int, double, double, int);
 	void Flip(int, int);
 	void PadOrigin(int);
+	void RandomPad(int);
 	void clearManVec();
 	void setToIdentity(int);
 	void HOG::loadImgs(const std::vector<cv::Mat> &);
@@ -40,6 +41,7 @@ protected:
 	cv::Mat featslabel;
 	std::vector<cv::Mat> HOGVec;
 private:
+	std::vector<int> classCount;
 	std::vector<std::string> ManStr;
 	cv::Size image_size;
 	cv::Size _wsize;

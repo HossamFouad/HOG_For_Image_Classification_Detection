@@ -63,10 +63,13 @@ int main()
 	p->clearManVec();
 	*/
 
-	/* Task2
-	struct Config* config = new Config();
+	// Task2
+	/*struct Config* config = new Config();
 	std::string imgpath = (std::filesystem::current_path() / ".." / ".." / ".." / "data" / "task2").string();
 	auto p = new Classifier(imgpath,config);
+	config->loaded = false;
+	config->trained = false;
+	//config->ImgConfig.NumManPerImg = 5;
 	if (!config->trained) {
 		p->loadTrainImgs();
 		p->imgsPreprocessing();
@@ -83,18 +86,39 @@ int main()
 
 	*/
 	
+	
 	 //Task3
 	struct DetectionConfig* config = new DetectionConfig();
-	config->classifier.loaded = false;
+	config->classifier.loaded = true;
 	config->classifier.trained = false;
+	config->classifier.RandomForest.randomSampleRatio = 0.95;
+	config->classifier.ImgConfig.NumManPerImg = 40;
+	//config->classifier.ImgConfig.FixedPad = false;
+	//config->classifier.ImgConfig.weighted = true;
+	if (config->classifier.ImgConfig.FixedPad&& config->classifier.ImgConfig.weighted) {
+		config->classifier.ImgConfig.classesCount= std::vector<int>{ 3,2,3,1 };
+	}
+	else if(!config->classifier.ImgConfig.FixedPad){
+		config->classifier.ImgConfig.classesCount = std::vector<int>{ 3,2,3, int(config->classifier.ImgConfig.PadImgNum)};
+	}
+	config->classifier.ImgConfig.scale[1] = 1.3;
+	config->classifier.ImgConfig.scale[0] = 0.6;
+	config->classifier.RandomForest.categoriesNum = 4;
+	config->classifier.RandomForest.max_depth = 30;
+	config->classifier.RandomForest.num_trees = 6;
+	//config->classifier.ImgConfig.angle[0] = -45;
+	//config->classifier.ImgConfig.angle[1] = 45;
 	std::string imgpath = (std::filesystem::current_path() / ".." / ".." / ".." / "data" / "task3").string();
 	auto p = new Detection(imgpath,config);
 	p->LoadInferenceImgs();
 	p->LoadGTBoundingBox();
 	//p->SaveBoundingBoxGT();
-	p->TrainClassifier();
+	if(!config->classifier.trained)p->TrainClassifier();
+	//p->ImgDetection(0);
+	for (int i=0;i<43;i++)p->ImgDetection(i);
+	p->PRCalculate();
 	delete config;
-
+	
 	
 	return 0;
 }

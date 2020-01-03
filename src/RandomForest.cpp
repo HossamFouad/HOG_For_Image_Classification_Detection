@@ -57,13 +57,17 @@ void RandomForest::train(cv::Mat& featsImg, cv::Mat& featslabel) {
     for (int t = 0; t < _num_trees; ++t) {
         std::cout << "Train tree no:" << t << std::endl;
         cv::Mat accVal;
+        //cv::Mat test;
         cv::Ptr<cv::ml::TrainData> bootstrap = cv::ml::TrainData::create(featsImg, cv::ml::ROW_SAMPLE, featslabel);
         bootstrap->setTrainTestSplitRatio(_ratio, true);
         //std::cout << bootstrap->getTrainSampleIdx().size() << std::endl;
-        //std::cout << bootstrap->getTestResponses().size() << std::endl;
+        //cv::transpose(bootstrap->getTestResponses(), test);
+        //std::cout << test << std::endl;
         //bootstrap->shuffleTrainTest();
         _forest[t]->train(bootstrap);
         _forest[t]->predict(bootstrap->getTestSamples(), accVal);
+        //cv::transpose(accVal , test);
+        //std::cout << test << std::endl;
         validate(bootstrap->getTestResponses(), accVal);
         accVal.release();
     }
