@@ -23,7 +23,9 @@ void Detection::LoadInferenceImgs() {
 		_BoundingBoxImgsNames.push_back(img.substr(found1 + 1, found2 - found1 - 1));
 		cv::Mat imgMatrix = cv::imread(img);
 		_BoundingBoxImgs.push_back(imgMatrix);
-		cv::cvtColor(imgMatrix, imgMatrix, cv::COLOR_BGR2GRAY);
+		if (_config->classifier.ImgConfig.grayscale) {
+			cv::cvtColor(imgMatrix, imgMatrix, cv::COLOR_BGR2GRAY);
+		}
 		_BoundingBoxGrayImgs.push_back(imgMatrix);
 		imgMatrix.release();
 	}

@@ -27,9 +27,10 @@ struct ImgProc {
 	bool weighted = false;
 	bool Manipulation = true; // enable manipulation
 	int NumManPerImg =32; // number of augmentations per image
-	float angle[4] = { -30.0,30.0 ,80,110};
+	float angle[2] = { -30.0,30.0};
 	float scale[2] = { 0.9,1.2 };
 	int padBorder = cv::BORDER_CONSTANT;
+	bool grayscale = false; 
 };
 
 struct Config {
@@ -47,11 +48,11 @@ struct DetectionConfig {
 	std::vector<std::string> classesFolder{ "Teeth","Motor","Black Item","Background" };	
 	std::vector<cv::Scalar> classesColors{ cv::Scalar(0, 255, 0),cv::Scalar(255, 0, 0),cv::Scalar(0, 0, 255)};
 	std::vector<std::string> Detectionfolders{ "gt","boundingBoxGT","boundingBoxInference","boundingBoxExperiment" };
-	std::vector<int> boundingbox{ 90,180 };//{ 64,80,96,112,128,144,160,176,192,208,224 };// , 150, 200, 250};
+	std::vector<int> boundingbox{ 90,180};//{ 64,80,96,112,128,144,160,176,192,208,224 };// , 150, 200, 250};
 	std::vector<float> IOUthreshold{ 0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1.0};
 	float CondifentThres = 0.7;
 	float OverlapThres = 0.0;
-	float StepSlide = 0.3;
+	float StepSlide = 0.1;
 	struct Config classifier;
 };
 

@@ -12,7 +12,7 @@ _trainHOG(nullptr),
 imgProcessingCount(0)
 {
 
-	_testHOG = std::make_unique<HOG>(configPtr->HOG.imgSize, configPtr->HOG.WinSize, configPtr->HOG.BlockSize, configPtr->HOG.BlockStride, configPtr->HOG.CellSize, configPtr->HOG.Bins,configPtr->ImgConfig.padBorder);
+	_testHOG = std::make_unique<HOG>(configPtr);
 	_RF = std::make_unique<RandomForest>(configPtr->RandomForest.randomSampleRatio, configPtr->RandomForest.num_trees, configPtr->RandomForest.cv_folds, configPtr->RandomForest.categoriesNum, configPtr->RandomForest.max_depth, configPtr->RandomForest.min_sample_count);
 
 }
@@ -50,7 +50,7 @@ imgProcessingCount(0)
 void Classifier::loadTrainImgs()
 {
 	std::vector<std::string> f = loadFolders(configPtr->folders[0]);
-	_trainHOG = std::make_unique<HOG>(configPtr->HOG.imgSize, configPtr->HOG.WinSize, configPtr->HOG.BlockSize, configPtr->HOG.BlockStride, configPtr->HOG.CellSize, configPtr->HOG.Bins, configPtr->ImgConfig.padBorder);
+	_trainHOG = std::make_unique<HOG>(configPtr);
 	for (const auto& folder : f) {
 		_trainHOG->imgList((fs::path(_imgpath) / configPtr->folders[0]/folder).string() ,static_cast<float>(folder[folder.length()-1]) - 48.0);
 	}

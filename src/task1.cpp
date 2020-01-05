@@ -17,6 +17,17 @@ _nbins(nb),
 _padType(padType)
 {}
 
+HOG::HOG(struct Config* c) :_conf(c)
+{
+	image_size = _conf->HOG.imgSize;
+	_wsize = _conf->HOG.WinSize;
+	_blockSize = _conf->HOG.BlockSize;
+	_blockStride = _conf->HOG.BlockStride;
+	_cellSize = _conf->HOG.CellSize;
+	_nbins = _conf->HOG.Bins;
+	_padType = _conf->ImgConfig.padBorder;
+}
+
 HOG::~HOG() {
 	imgsVec.clear();
 	HOGVec.clear();
@@ -28,9 +39,10 @@ void HOG::loadImgs(bool M,int num) {
 	}
 	int imgNum = imgsVec.size();
 	std::cout << "Num of images Loaded =" << imgNum << std::endl;
-	
-	for (int i = 0; i < imgNum; i++) {
-		GrayScale(i);
+	if (_conf->ImgConfig.grayscale) {
+		for (int i = 0; i < imgNum; i++) {
+			GrayScale(i);
+		}
 	}
 	int sumElements{ 0 };
 	for (int j = 0; j < classCount.size() - 1; j++)sumElements += classCount[j];

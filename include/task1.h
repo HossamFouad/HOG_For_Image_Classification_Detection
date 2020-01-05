@@ -2,10 +2,12 @@
 #include<iostream>
 #include <opencv2/opencv.hpp>
 #include "task2.h"
+#include "Config.h"
 class HOG {
 public:
 	friend class Classifier;
 	HOG(cv::Size, cv::Size, cv::Size, cv::Size, cv::Size, int,int);
+	HOG(struct Config*);
 	virtual ~HOG();
 	void loadImgs(bool M = true, int num=0);
 	void imgList(std::string,float);
@@ -38,7 +40,7 @@ protected:
 	std::vector<std::unique_ptr<cv::Mat>> ManimgsVec;
 	cv::Mat featsImg;
 	cv::Mat labels;
-	cv::Mat featslabel;
+	cv::Mat featslabel; // for ManimgsVec
 	std::vector<cv::Mat> HOGVec;
 private:
 	std::vector<int> classCount;
@@ -55,4 +57,6 @@ private:
 	cv::HOGDescriptor hog;
 	std::vector<std::string> ManimgListVec_;
 	std::vector<std::string> imgListVec_;
+	struct Config* _conf;
+
 };

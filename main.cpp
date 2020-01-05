@@ -12,19 +12,9 @@
 
 int main()
 {
-	
-	/* Task1
+	/*
+	//Task1
 	// HOG Descriptor Parameters
-	cv::Size imgSize = cv::Size(384,384);
-	cv::Size WinSize = cv::Size(384, 384);
-	cv::Size BlockSize = cv::Size(64, 64);
-	cv::Size BlockStride = cv::Size(32, 32);
-	cv::Size CellSize = cv::Size(32, 32);
-	int padType = cv::BORDER_CONSTANT;
-	int Bins = 8;
-	// Resize
-	float xfactor = 2;
-	float yfactor = 2;
 	// Rotate
 	float angle = 60;
 	float scale = 1;
@@ -32,8 +22,9 @@ int main()
 	float flipX = 0;
 	//Pad
 	float borders = 4;
+	struct Config* config = new Config();
 	std::string imgpath = (std::filesystem::current_path() /".."/".."/".."/"data"/"task1").string();
-	auto p = new HOG(imgSize,WinSize, BlockSize, BlockStride, CellSize, Bins,padType) ;
+	auto p = new HOG(config) ;
 	p->imgList(imgpath,0.0);
 	p->loadImgs();
 	p->visualizeImg(0,"I");
@@ -62,33 +53,26 @@ int main()
 	p->VisHOG(0);
 	p->clearManVec();
 	*/
-
+	
+	/*
 	// Task2
-	/*struct Config* config = new Config();
+	struct Config* config = new Config();
 	std::string imgpath = (std::filesystem::current_path() / ".." / ".." / ".." / "data" / "task2").string();
 	auto p = new Classifier(imgpath,config);
 	config->loaded = false;
 	config->trained = false;
-	//config->ImgConfig.NumManPerImg = 5;
 	if (!config->trained) {
 		p->loadTrainImgs();
 		p->imgsPreprocessing();
 		p->trainRandomForest();
-		//p->MultiAugTrain();
-
 	}
-	
-	
-
 	p->loadTestImgs();
 	p->testRandomForest();
 	delete config;
-
 	*/
 	
-	
-	 //Task3
-	struct DetectionConfig* config = new DetectionConfig();
+	//Task3
+	/*struct DetectionConfig* config = new DetectionConfig();
 	config->classifier.loaded = true;
 	config->classifier.trained = false;
 	config->classifier.RandomForest.randomSampleRatio = 0.95;
@@ -119,6 +103,7 @@ int main()
 	p->PRCalculate();
 	delete config;
 	
-	
+	*/
+
 	return 0;
 }
